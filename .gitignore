@@ -1,0 +1,4 @@
+results/*
+.idea/*
+___pycache___/*
+*.pyc
