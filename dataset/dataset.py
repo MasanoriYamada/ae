@@ -18,8 +18,6 @@ class Dataset(metaclass=ABCMeta):
         self.train_size = -1
         self.test_size = -1
         self.range = [0., 1.]
-        self.train_idx = 0
-        self.test_idx = 0
         self.total_dim = 0
 
         self.x_data = None
