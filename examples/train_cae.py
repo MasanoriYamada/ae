@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" Denoising auto encoder in mnist
+""" Convolutional auto encoder in mnist
 """
 from __future__ import unicode_literals
 from __future__ import print_function
@@ -23,9 +23,6 @@ from ae.net import cae
 from ae import image
 from ae import util
 
-__author__ = "Masanori Yamada"
-__date__ = "30 Jul 2017"
-
 
 def main():
 
@@ -33,7 +30,7 @@ def main():
     epoch_num = 100
     batch_size = 128
     ana_freq = 1
-    gpu = 1
+    gpu = 0
 
     # set logger
     logging.config.fileConfig('./log/log.conf')
@@ -56,7 +53,8 @@ def main():
     # read data
     global data_obj
     data_obj = dataset.data_mnist.MnistDataset()
-    # data_obj.train_size = 6000 # adjust train data size for speed
+    data_obj.train_size = 6000 # adjust train data size for speed
+    data_obj.test_size = 9
 
     # model and optimizer
     model = cae.CAE(data_obj)
@@ -87,7 +85,9 @@ def main():
         if epoch % ana_freq == 0:
             with chainer.using_config('train', False):
                 plt_dict['epoch'] = epoch
-                test_iter = data_obj.get_test_iter(size=9)
+                plt_dict['test_rec_x'] = []
+                plt_dict['test_x'] = []
+                test_iter = data_obj.get_test_iter()
                 for x, t in test_iter:
                     x = chainer.Variable(xp.array(x, dtype=xp.float32))
                     rec_x = model(x)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-""" Auto encoder in mnist
+""" Denoising convolutional auto encoder in mnist
 """
 from __future__ import unicode_literals
 from __future__ import print_function
@@ -19,7 +19,7 @@ from logging import getLogger
 import chainer
 
 import dataset.data_mnist
-from ae.net import ae
+from ae.net import cae
 from ae import image
 from ae import util
 
@@ -29,8 +29,8 @@ def main():
     # parametor
     epoch_num = 100
     batch_size = 128
-    ana_freq = 10
-    gpu = -1
+    ana_freq = 1
+    gpu = 0
 
     # set logger
     logging.config.fileConfig('./log/log.conf')
@@ -44,19 +44,20 @@ def main():
 
     # plot_dict
     plt_tuple = (
-        ('epoch', 0),
-        ('test_rec_x',[]),
-        ('test_x', []),
-        ('head', 'results/'),)
+    ('epoch', 0),
+    ('test_rec_x', []),
+    ('test_x', []),
+    ('head', 'results/'),)
     plt_dict = OrderedDict(plt_tuple)
 
     # read data
     global data_obj
     data_obj = dataset.data_mnist.MnistDataset()
+    data_obj.train_size = 6000 # adjust train data size for speed
     data_obj.test_size = 9
 
     # model and optimizer
-    model = ae.AE(data_obj)
+    model = cae.CAE(data_obj)
     opt = chainer.optimizers.Adam()
     opt.setup(model)
 
@@ -70,15 +71,14 @@ def main():
 
     # Learning loop
     for epoch in range(epoch_num):
-        train_iter = data_obj.get_train_iter(batch_size)
+        train_iter = data_obj.get_train_iter(batch_size, noise_type='salt')
         total_loss = 0.
         for i, (x, t) in enumerate(train_iter):
             x = chainer.Variable(xp.array(x, dtype=xp.float32))
             opt.update(model.get_loss_func(), x)
             local_loss = model.loss.data * len(x.data)
             total_loss += local_loss
-            logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch,
-                                                                              local_loss / batch_size))
+            logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch, local_loss / batch_size))
         logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss/batch_size))
         print('epoch = {}, train loss = {}'.format(epoch, total_loss/batch_size))
         # evaluate
@@ -87,16 +87,18 @@ def main():
                 plt_dict['epoch'] = epoch
                 plt_dict['test_rec_x'] = []
                 plt_dict['test_x'] = []
-                test_iter = data_obj.get_test_iter()
+                test_iter = data_obj.get_test_iter(batch_size=9, noise_type=None)
                 for x, t in test_iter:
                     x = chainer.Variable(xp.array(x, dtype=xp.float32))
                     rec_x = model(x)
                     plt_dict['test_rec_x'].append(rec_x.data)
+                    x = x.reshape(
+                        (-1, data_obj.data_shape[0], data_obj.data_shape[1], data_obj.data_shape[2]))
                     plt_dict['test_x'].append(x.data)
                 analysis(plt_dict)
 
 def analysis(plt_dict):
-    #plt_dict = util.dict_to_cpu(plt_dict)
+    plt_dict = util.dict_to_cpu(plt_dict)
     rec_x = plt_dict['test_rec_x']
     image.save_images_tile(rec_x[0], plt_dict['head'] + '/rec_x_{}.pdf'.format(plt_dict['epoch']), data_obj)
 

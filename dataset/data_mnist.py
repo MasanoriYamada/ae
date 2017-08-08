@@ -8,6 +8,7 @@ class MnistDataset(dataset.dataset.Dataset):
     def __init__(self):
         self.name = 'mnist'
         self.data_shape = [1, 28, 28]
+        self.batch_data_shape = (-1, 1, 28, 28)
         self.width = 28
         self.height = 28
         self.train_size = 50000
