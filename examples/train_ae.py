@@ -93,10 +93,11 @@ def main():
                     rec_x = model(x)
                     plt_dict['test_rec_x'].append(rec_x.data)
                     plt_dict['test_x'].append(x.data)
+                if gpu >=0:
+                    plt_dict = util.dict_to_cpu(plt_dict)
                 analysis(plt_dict)
 
 def analysis(plt_dict):
-    #plt_dict = util.dict_to_cpu(plt_dict)
     rec_x = plt_dict['test_rec_x']
     image.save_images_tile(rec_x[0], plt_dict['head'] + '/rec_x_{}.pdf'.format(plt_dict['epoch']), data_obj)
 

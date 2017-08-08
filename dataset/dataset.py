@@ -4,8 +4,11 @@
 import numpy as np
 import six
 from sklearn.model_selection import train_test_split
+from abc import ABCMeta, abstractmethod
 
-class Dataset(object):
+
+class Dataset(metaclass=ABCMeta):
+    @abstractmethod
     def __init__(self):
         self.name = 'abstract'
         self.data_shape = []
@@ -39,17 +42,17 @@ class Dataset(object):
         """
 
         test_iter = []
-        if batch_size == None:
+        if batch_size is None:
             data, label = self.test_array._datasets
-            if noise_type == None:
+            if noise_type is None:
                 data = self.add_noise(data[:self.test_size], noise_type)
             test_iter.append((data[:self.test_size], label[:self.test_size]))
 
-        elif batch_size != None:
+        elif batch_size is not None:
             data, label = self.test_array._datasets[:self.test_size]
             for i in six.moves.range(0, self.test_size, batch_size):
                 split_data, split_label = data[i: i + batch_size], label[i: i + batch_size]
-                if noise_type != None:
+                if noise_type is not None:
                     split_data = self.add_noise(split_data, noise_type)
                 test_iter.append((split_data, split_label))
         return test_iter
@@ -63,7 +66,7 @@ class Dataset(object):
         data, label = self.train_array._datasets # need for random sampling in all data
         for i in six.moves.range(0, self.train_size, batch_size):
             split_data, split_label = data[perm[i: i + batch_size]], label[perm[i: i + batch_size]]
-            if noise_type != None:
+            if noise_type is not None:
                 split_data = self.add_noise(split_data, noise_type)
             train_iter.append((split_data, split_label))
         return train_iter
