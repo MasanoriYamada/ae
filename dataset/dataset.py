@@ -7,9 +7,9 @@ from sklearn.model_selection import train_test_split
 
 class Dataset(object):
     def __init__(self):
-        self.namda = 'abstract'
+        self.name = 'abstract'
         self.data_shape = []
-        self.witdth = -1
+        self.width = -1
         self.height = -1
         self.train_size = -1
         self.test_size = -1

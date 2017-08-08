@@ -1,4 +1,5 @@
-results/*
 .idea/*
 ___pycache___/*
 *.pyc
+results/*
+log/*
