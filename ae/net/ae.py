@@ -15,6 +15,7 @@ import chainer.functions as F
 
 class AE(chainer.Chain):
     def __init__(self, data_obj):
+        self.data_obj = data_obj
         super(AE, self).__init__()
         with self.init_scope():
             # parts of netowork
@@ -28,11 +29,14 @@ class AE(chainer.Chain):
         return F.relu(self.lde1(z))
 
     def __call__(self, x):
-        return self.decode(self.encode(x))
+        x = x.reshape(-1,self.data_obj.total_dim)
+        return self.decode(self.encode(x)).reshape(self.data_obj.batch_data_shape)
 
     def get_loss_func(self):
         def loss_func(x):
+            x = x.reshape(-1, self.data_obj.total_dim)
             rec_x = self.decode(self.encode(x))
+            rec_x = rec_x.reshape(-1, self.data_obj.total_dim)
             self.loss = F.mean_squared_error(x, rec_x)
             return self.loss
         return loss_func

@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import *  # NOQA
+from future import standard_library
+standard_library.install_aliases()
 
 import numpy as np
 import six
@@ -27,7 +34,7 @@ class Dataset(metaclass=ABCMeta):
 
     def split_train_test(self, split_rate=0.8):
         train_x, test_x, train_label, test_label = train_test_split(self.x_data, self.label_data,
-                                                                    test_size = split_rate, random_state = 42)
+                                                                    train_size = split_rate, random_state = 42)
         self.train_array = (train_x, train_label)
         self.test_array = (test_x, test_label)
         self.train_size = len(train_label)
@@ -41,13 +48,13 @@ class Dataset(metaclass=ABCMeta):
 
         test_iter = []
         if batch_size is None:
-            data, label = self.test_array._datasets
+            data, label = self.test_array
             if noise_type is None:
                 data = self.add_noise(data[:self.test_size], noise_type)
             test_iter.append((data[:self.test_size], label[:self.test_size]))
 
         elif batch_size is not None:
-            data, label = self.test_array._datasets[:self.test_size]
+            data, label = self.test_array[:self.test_size]
             for i in six.moves.range(0, self.test_size, batch_size):
                 split_data, split_label = data[i: i + batch_size], label[i: i + batch_size]
                 if noise_type is not None:
@@ -61,7 +68,7 @@ class Dataset(metaclass=ABCMeta):
         """
         perm = np.random.permutation(self.train_size)
         train_iter = []
-        data, label = self.train_array._datasets # need for random sampling in all data
+        data, label = self.train_array # need for random sampling in all data
         for i in six.moves.range(0, self.train_size, batch_size):
             split_data, split_label = data[perm[i: i + batch_size]], label[perm[i: i + batch_size]]
             if noise_type is not None:

@@ -30,7 +30,7 @@ def main():
     epoch_num = 100
     batch_size = 128
     ana_freq = 1
-    gpu = 0
+    gpu = -1
 
     # set logger
     logging.config.fileConfig('./log/log.conf')
@@ -53,7 +53,7 @@ def main():
     # read data
     global data_obj
     data_obj = dataset.data_mnist.MnistDataset()
-    data_obj.train_size = 6000 # adjust train data size for speed
+    data_obj.train_size = 100 # adjust train data size for speed
     data_obj.test_size = 9
 
     # model and optimizer

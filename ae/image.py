@@ -14,7 +14,6 @@ matplotlib.use('Pdf')
 import matplotlib.pyplot as plt
 import math
 from logging import getLogger
-import six
 
 logger = getLogger(__name__)
 
@@ -33,13 +32,18 @@ def save_images_tile(x, filename, data):
     col = data_len // raw
     logger.debug('data len = {}'.format(data_len))
     logger.debug('output raw = {}, col = {}'.format(raw,col))
-    if data.data_shape[0] == 3:
+    if data.data_shape[-1] == 3:
         color_is = True
-    elif data.data_shape[0] == 1:
+        data_shape = (data.data_shape[0], data.data_shape[1], data.data_shape[2])
+    elif data.data_shape[-1] == 1:
         color_is = False
+        data_shape = (data.data_shape[0], data.data_shape[1])
     logger.debug('color is = {}'.format(color_is))
+
     fig, ax = plt.subplots(col, raw, figsize=(9, 9), dpi=100)
     for ai, xi in zip(ax.flatten(), x):
-        ai.imshow(xi.reshape(data.data_shape)) if color_is else ai.imshow(xi.reshape((data.data_shape[1], data.data_shape[2])))
+        # image rescale to 0~1
+        xi = data.display(xi)
+        ai.imshow(xi.reshape(data_shape), shape=data_shape) if color_is else ai.imshow(xi.reshape(data_shape), shape=data_shape)
     fig.savefig(filename)
     plt.close()
