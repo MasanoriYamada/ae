@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 import math
 from logging import getLogger
 
-logger = getLogger(__name__)
 
 def save_images_tile(x, filename, data):
     """ save image
@@ -23,6 +22,8 @@ def save_images_tile(x, filename, data):
     x.shape = (datasize, channel, width, height) width and height get from data.data_shape
 
     """
+    logger = getLogger(__name__)
+
     # check data size
     data_len = len(x)
     if data_len > 81:
