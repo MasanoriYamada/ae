@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from dataset import dataset
 
 class CelebADataset(dataset.Dataset):
-    def __init__(self, db_path="celebA", crop=True, data_size=None):
+    def __init__(self, db_path="~/lab/dat/celebA", crop=True, data_size=None):
         super(CelebADataset, self).__init__()
 
         self.name = 'celebA'
@@ -44,8 +44,6 @@ class CelebADataset(dataset.Dataset):
         self.train_size = -1
         self.test_size = -1
         self.split_train_test(split_rate=0.8)
-
-
 
     def set_train_test_data(self):
         sample_files = self.data_files

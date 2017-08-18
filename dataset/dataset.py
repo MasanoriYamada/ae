@@ -68,7 +68,7 @@ class Dataset(metaclass=ABCMeta):
         """
         perm = np.random.permutation(self.train_size)
         train_iter = []
-        data, label = self.train_array # need for random sampling in all data
+        data, label = self.train_array  # need for random sampling in all data
         for i in six.moves.range(0, self.train_size, batch_size):
             split_data, split_label = data[perm[i: i + batch_size]], label[perm[i: i + batch_size]]
             if noise_type is not None:

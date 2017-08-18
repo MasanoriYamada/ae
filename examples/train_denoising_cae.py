@@ -19,6 +19,8 @@ from logging import getLogger
 import chainer
 
 import dataset.data_mnist
+import dataset.data_celeba
+import dataset.data_dsprites
 from ae.net import cae
 from ae import image
 from ae import util
@@ -52,7 +54,9 @@ def main():
 
     # read data
     global data_obj
-    data_obj = dataset.data_mnist.MnistDataset()
+    data_obj = dataset.data_dsprites.DspritesDataset(db_path='/Users/yamada/lab/dat/dsprites')
+    # data_obj = dataset.data_celeba.CelebADataset(db_path='./dataset/celebA', data_size=10000)
+    # data_obj = dataset.data_mnist.MnistDataset()
     data_obj.train_size = 100 # adjust train data size for speed
     data_obj.test_size = 9
 
