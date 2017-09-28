@@ -15,8 +15,10 @@ from collections import OrderedDict
 import numpy as np
 import logging.config
 from logging import getLogger
+from datetime import datetime
 
 import chainer
+from tensorboard import SummaryWriter
 
 import dataset.data_mnist
 import dataset.data_celeba
@@ -32,7 +34,7 @@ def main():
     epoch_num = 100
     batch_size = 128
     ana_freq = 1
-    gpu = 1
+    gpu = -1
 
     # set logger
     logging.config.fileConfig('./log/log.conf')
@@ -44,6 +46,9 @@ def main():
     logger.info('ana_freq = {}'.format(ana_freq))
     logger.info('gpu = {}'.format(gpu))
 
+    # set writer
+    writer = SummaryWriter('results/' + datetime.now().strftime('%B%d  %H:%M:%S'))
+
     # plot_dict
     plt_tuple = (
     ('epoch', 0),
@@ -54,9 +59,9 @@ def main():
 
     # read data
     global data_obj
-    data_obj = dataset.data_dsprites.DspritesDataset(db_path='~/lab/dat/dsprites')
+    # data_obj = dataset.data_dsprites.DspritesDataset(db_path='~/lab/dat/dsprites')
     # data_obj = dataset.data_celeba.CelebADataset(db_path='./dataset/celebA', data_size=10000)
-    # data_obj = dataset.data_mnist.MnistDataset()
+    data_obj = dataset.data_mnist.MnistDataset()
     data_obj.train_size = 8000  # adjust train data size for speed
     data_obj.test_size = 9
 
@@ -73,6 +78,9 @@ def main():
         chainer.cuda.get_device_from_id(gpu).use()
         model.to_gpu()  # Copy the model to the GPU
 
+    tmp_loss = model(chainer.Variable(np.random.rand(1, data_obj.total_dim).astype(np.float32)))
+    writer.add_graph([tmp_loss])
+
     # Learning loop
     for epoch in range(epoch_num):
         train_iter = data_obj.get_train_iter(batch_size)
@@ -80,11 +88,13 @@ def main():
         for i, (x, t) in enumerate(train_iter):
             x = chainer.Variable(xp.array(x, dtype=xp.float32))
             opt.update(model.get_loss_func(), x)
-            local_loss = model.loss.data * len(x.data)
+            local_loss = model.loss * len(x.data)
             total_loss += local_loss
-            logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch, local_loss / batch_size))
-        logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss/batch_size))
-        print('epoch = {}, train loss = {}'.format(epoch, total_loss/batch_size))
+            logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch, local_loss.data / batch_size))
+        logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss.data/batch_size))
+        writer.add_all_parameter_histograms([total_loss], epoch, pattern='.*CAE.*')
+        writer.add_scalar('train_loss', total_loss.data/batch_size, epoch)
+
         # evaluate
         if epoch % ana_freq == 0:
             with chainer.using_config('train', False):
@@ -102,6 +112,7 @@ def main():
                 if gpu >= 0:
                     plt_dict = util.dict_to_cpu(plt_dict)
                 analysis(plt_dict)
+    writer.close()
 
 def analysis(plt_dict):
     rec_x = plt_dict['test_rec_x']

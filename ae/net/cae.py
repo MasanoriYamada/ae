@@ -14,10 +14,11 @@ from logging import getLogger
 import chainer
 import chainer.links as L
 import chainer.functions as F
+from tensorboard import name_scope, within_name_scope
 
 class CAE(chainer.Chain):
     def __init__(self, data_obj):
-        logger = getLogger(__name__)
+        self.logger = getLogger(__name__)
         self.data_obj = data_obj
         super(CAE, self).__init__()
         with self.init_scope():
@@ -39,30 +40,21 @@ class CAE(chainer.Chain):
                 self.lde1 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
                 self.lde2 = L.Deconvolution2D(in_channels=32, out_channels=1, ksize=5, stride=1, pad=0)
             else:
-                logger.error('dataset not define = {}'.format(self.data_obj.name))
+                self.logger.error('dataset not define = {}'.format(self.data_obj.name))
 
+    @within_name_scope('CAE')
     def encode(self, x):
-        if self.data_obj.name == 'mnist':
+        with name_scope('conv1', self.len1.params()):
             x = F.relu(self.len1(x))
-            x = F.relu(self.len2(x))
-
-        elif self.data_obj.name == 'celebA':
-            x = F.relu(self.len1(x))
-            x = F.relu(self.len2(x))
-        elif self.data_obj.name == 'dsprites':
-            x = F.relu(self.len1(x))
+        with name_scope('conv2', self.len2.params()):
             x = F.relu(self.len2(x))
         return x
 
+    @within_name_scope('CAE')
     def decode(self, z):
-        if self.data_obj.name == 'mnist':
+        with name_scope('conv3', self.lde1.params()):
             z = F.relu(self.lde1(z))
-            z = F.sigmoid(self.lde2(z))
-        elif self.data_obj.name == 'celebA':
-            z = F.relu(self.lde1(z))
-            z = F.sigmoid(self.lde2(z))
-        elif self.data_obj.name == 'dsprites':
-            z = F.relu(self.lde1(z))
+        with name_scope('conv4', self.lde2.params()):
             z = F.sigmoid(self.lde2(z))
         return z
 
