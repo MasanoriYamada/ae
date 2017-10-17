@@ -24,20 +24,21 @@ class AE(chainer.Chain):
             self.len1 = L.Linear(None, 100)
             self.lde1 = L.Linear(None, data_obj.total_dim)
 
-    @within_name_scope('AE')
     def encode(self, x):
         with name_scope('linear1', self.len1.params()):
             return F.relu(self.len1(x))
 
-    @within_name_scope('AE')
     def decode(self, z):
         with name_scope('linear2', self.lde1.params()):
             return F.relu(self.lde1(z))
 
+    @within_name_scope('AE')
     def __call__(self, x):
         x = x.reshape(-1,self.data_obj.total_dim)
-        h1 = self.encode(x)
-        h2 = self.decode(h1)
+        with name_scope('encoder', self.len1.params()):
+            h1 = self.encode(x)
+        with name_scope('decoder', self.lde1.params()):
+            h2 = self.decode(h1)
         return h2.reshape(self.data_obj.batch_data_shape)
 
     def get_loss_func(self):

@@ -33,7 +33,7 @@ class DspritesDataset(dataset.dataset.Dataset):
 
         # original
         self.db_path = db_path
-        dataset_zip = np.load(db_path + '/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz', encoding='latin1')
+        dataset_zip = np.load(self.db_path + '/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz', encoding='latin1')
         self.imgs = dataset_zip['imgs']
         metadata = dataset_zip['metadata'][()]
         # Define number of values per latents and functions to convert to indices
