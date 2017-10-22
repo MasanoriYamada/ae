@@ -40,8 +40,13 @@ class CAE(chainer.Chain):
             elif self.data_obj.name == 'celebA':
                 self.len1 = L.Convolution2D(in_channels=3, out_channels=32, ksize=5, stride=1, pad=0)
                 self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=5, stride=1, pad=0)
-                self.lde1 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
-                self.lde2 = L.Deconvolution2D(in_channels=32, out_channels=3, ksize=5, stride=1, pad=0)
+                self.len3 = L.Linear(56*56*64, 100)
+                self.conv_linear_shape = (-1,56*56*64)
+                self.deconv_linear_shape = (-1, 64, 56, 56)
+                self.lde1 = L.Linear(100, 56*56*64)
+                self.lde2 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
+                self.lde3 = L.Deconvolution2D(in_channels=32, out_channels=3, ksize=5, stride=1, pad=0)
+
             elif self.data_obj.name == 'dsprites':
                 self.len1 = L.Convolution2D(in_channels=1, out_channels=32, ksize=5, stride=1, pad=0)
                 self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=5, stride=1, pad=0)

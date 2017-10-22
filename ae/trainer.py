@@ -113,13 +113,13 @@ class Trainer(object):
 
             rec_x = plt_dict['test_rec_x']
             tensorboard_rec_x = rec_x[0].reshape(data_obj.batch_data_shape).transpose(0,3,1,2)
-            tensorboard_rec_x = tensorboard.utils.make_grid(tensorboard_rec_x)
+            tensorboard_rec_x = tensorboard.utils.make_grid(data_obj.display(tensorboard_rec_x))
             self.writer.add_image('reconstruct_image', tensorboard_rec_x, epoch)
             image.save_images_tile(rec_x[0], plt_dict['head'] + '/rec_x_{}.pdf'.format(plt_dict['epoch']), data_obj)
 
             test_x = plt_dict['test_x']
             tensorboard_test_x = test_x[0].reshape(data_obj.batch_data_shape).transpose(0,3,1,2)
-            tensorboard_test_x = tensorboard.utils.make_grid(tensorboard_test_x)
+            tensorboard_test_x = tensorboard.utils.make_grid(data_obj.display(tensorboard_test_x))
             self.writer.add_image('test_image', tensorboard_test_x, epoch)
             image.save_images_tile(test_x[0], plt_dict['head'] + '/test_x_{}.pdf'.format(plt_dict['epoch']), data_obj)
 
