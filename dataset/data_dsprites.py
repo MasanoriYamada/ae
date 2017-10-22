@@ -89,6 +89,73 @@ class DspritesDataset(dataset.dataset.Dataset):
     def display(self, image):
         return image
 
+    def get_pos_test(self, x_start, x_goal, y_start, y_goal, shape_lst=[0, 1, 2]):
+        assert x_goal <= self.nx, "Nx_pos must x_goal <= Nx_pos: actual Nx_pos= {}, x_goal = {}".format(self.nx, x_goal)
+        assert y_goal <= self.ny, "Ny_pos must y_goal <= Ny_pos: actual Ny_pos= {}, y_goal = {}".format(self.ny, y_goal)
+        latents_sampled = self._sample_latent(x_start, x_goal, y_start, y_goal, scale_start=0, scale_goal=self.ns,
+                                              rot_start=0, rot_goal=self.nr, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array([latents_sampled[:, 4], latents_sampled[:, 5]])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id.T}
+
+    def get_scale_test(self, scale_start, scale_goal, shape_lst=[0, 1, 2]):
+        latents_sampled = self._sample_latent(x_start=0, x_goal=self.nx, y_start=0, y_goal=self.ny,
+                                              scale_start=scale_start, scale_goal=scale_goal,
+                                              rot_start=0, rot_goal=self.nr, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array(latents_sampled[:, 2])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id}
+
+    def get_scale_half_test(self, scale_start, scale_goal, shape_lst=[0, 1, 2]):
+        latents_sampled = self._sample_latent(x_start=int(self.nx / 4), x_goal=int(self.nx / 4 * 3),
+                                              y_start=int(self.ny / 4), y_goal=int(self.ny / 4 * 3),
+                                              scale_start=scale_start, scale_goal=scale_goal,
+                                              rot_start=0, rot_goal=self.nr, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array(latents_sampled[:, 2])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id}
+
+    def get_rot_test(self, rot_start, rot_goal, shape_lst=[0, 1, 2]):
+        latents_sampled = self._sample_latent(x_start=0, x_goal=self.nx, y_start=0, y_goal=self.ny, scale_start=0,
+                                              scale_goal=self.ns,
+                                              rot_start=rot_start, rot_goal=rot_goal, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array(latents_sampled[:, 3])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id}
+
+    def get_rot_half_test(self, rot_start, rot_goal, shape_lst=[0, 1, 2]):
+        latents_sampled = self._sample_latent(x_start=int(self.nx / 4), x_goal=int(self.nx / 4 * 3),
+                                              y_start=int(self.ny / 4), y_goal=int(self.ny / 4 * 3), scale_start=0,
+                                              scale_goal=self.ns,
+                                              rot_start=rot_start, rot_goal=rot_goal, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array(latents_sampled[:, 3])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id}
+
+    def get_pos_single_test(self, x_start, x_goal, y_start, y_goal, shape_lst=[0, 1, 2]):
+        assert x_goal <= self.nx, "Nx_pos must x_goal <= Nx_pos: actual Nx_pos= {}, x_goal = {}".format(self.nx, x_goal)
+        assert y_goal <= self.ny, "Ny_pos must y_goal <= Ny_pos: actual Ny_pos= {}, y_goal = {}".format(self.ny, y_goal)
+        latents_sampled = self._sample_latent(x_start, x_goal, y_start, y_goal, scale_start=2, scale_goal=3,
+                                              rot_start=0, rot_goal=1, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array([latents_sampled[:, 4], latents_sampled[:, 5]])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id.T}
+
+    def get_scale_single_test(self, scale_start, scale_goal, shape_lst=[0, 1, 2]):
+        latents_sampled = self._sample_latent(x_start=15, x_goal=16, y_start=15, y_goal=16, scale_start=scale_start,
+                                              scale_goal=scale_goal,
+                                              rot_start=0, rot_goal=1, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array(latents_sampled[:, 2])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id}
+
+    def get_rot_single_test(self, rot_start, rot_goal, shape_lst=[0, 1, 2]):
+        latents_sampled = self._sample_latent(x_start=15, x_goal=16, y_start=15, y_goal=16, scale_start=2, scale_goal=3,
+                                              rot_start=rot_start, rot_goal=rot_goal, shape_lst=shape_lst)
+        id = self._latent_to_index(latents_sampled)
+        label_id = np.array(latents_sampled[:, 3])
+        return {'data': self._2d_to_1d(self.imgs[id]), 'label': label_id}
+
 if __name__ == '__main__':
     data = DspritesDataset()
     while True:
