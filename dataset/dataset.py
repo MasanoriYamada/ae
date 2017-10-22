@@ -49,7 +49,7 @@ class Dataset(metaclass=ABCMeta):
         test_iter = []
         if batch_size is None:
             data, label = self.test_array
-            if noise_type is None:
+            if noise_type is not None:
                 data = self.add_noise(data[:self.test_size], noise_type)
             test_iter.append((data[:self.test_size], label[:self.test_size]))
 

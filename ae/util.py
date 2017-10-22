@@ -78,13 +78,6 @@ def split_int(x):
     b = x - a
     return (a, b)
 
-def set_logger(file, debug_flg):
-    global Logger
-    Logger = logging.getLogger('train_dis_vae')
-    Logger.setLevel(logging.DEBUG) if debug_flg else Logger.setLevel(logging.INFO)
-    handler = logging.handlers.RotatingFileHandler(file, maxBytes=10 * 1024 * 1024, backupCount=1)
-    Logger.addHandler(handler)
-
 def warm_up(max_kl, current_epoch, max_epoch=500.):
     beta =  (current_epoch / max_epoch) * max_kl
     return beta if max_kl >= beta else max_kl
