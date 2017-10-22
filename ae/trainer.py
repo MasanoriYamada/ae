@@ -74,10 +74,10 @@ class Trainer(object):
                 self.writer.add_all_parameter_histograms([local_loss], epoch)
             self.logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss / batch_size))
             self.writer.add_scalar('train_loss', total_loss / batch_size, epoch)
-            if total_loss.data < self.best_loss:
+            if total_loss < self.best_loss:
                 self.best_model = copy.deepcopy(self.model)
                 self.best_opt = copy.deepcopy(self.opt)
-                self.best_loss = total_loss.data
+                self.best_loss = total_loss
                 self.logger.debug('model update')
             if epoch % ana_freq == 0:
                 self.eval(data_obj, epoch, noise_type)
