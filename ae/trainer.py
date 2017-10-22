@@ -12,6 +12,7 @@ standard_library.install_aliases()
 import numpy as np
 import copy
 import chainer
+from chainer import serializers
 from logging import getLogger
 from ae import image
 from ae import util
@@ -48,7 +49,7 @@ class Trainer(object):
         '''
 
         self.opt.setup(self.model)
-        tmp_loss = self.model(chainer.Variable(np.random.rand(1, data_obj.total_dim).astype(np.float32)))
+        tmp_loss = self.model(chainer.Variable(self.xp.random.rand(1, data_obj.total_dim).astype(self.xp.float32)))
         self.writer.add_graph([tmp_loss])
 
         # Learning loop
@@ -67,13 +68,12 @@ class Trainer(object):
                 x = chainer.Variable(self.xp.array(x, dtype=self.xp.float32))
                 self.opt.update(self.model.get_loss_func(), x)
                 local_loss = self.model.loss * len(x.data)
-                total_loss += local_loss
+                total_loss += local_loss.data
                 self.logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch,
                                                                                   local_loss.data / batch_size))
-            self.logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss.data / batch_size))
-            # writer.add_all_variable_images([total_loss], pattern='.*AE.*')
-            self.writer.add_all_parameter_histograms([total_loss], epoch)
-            self.writer.add_scalar('train_loss', total_loss.data / batch_size, epoch)
+                self.writer.add_all_parameter_histograms([local_loss], epoch)
+            self.logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss / batch_size))
+            self.writer.add_scalar('train_loss', total_loss / batch_size, epoch)
             if total_loss.data < self.best_loss:
                 self.best_model = copy.deepcopy(self.model)
                 self.best_opt = copy.deepcopy(self.opt)
@@ -123,5 +123,16 @@ class Trainer(object):
             self.writer.add_image('test_image', tensorboard_test_x, epoch)
             image.save_images_tile(test_x[0], plt_dict['head'] + '/test_x_{}.pdf'.format(plt_dict['epoch']), data_obj)
 
+    def save(self, path):
+        serializers.save_npz(path + '/model.npz', self.best_model)
+        serializers.save_npz(path + '/optimizer.npz', self.best_opt)
 
+    def load(self, path=None):
+        if path is not None:
+            serializers.load_npz(path+'/model.npz', self.model)
+            serializers.load_npz(path+'/optimizer.npz', self.opt)
+            self.best_model = copy.deepcopy(self.model)
+            self.best_opt = copy.deepcopy(self.opt)
+        else:
+            return 0
 
