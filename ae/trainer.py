@@ -69,9 +69,9 @@ class Trainer(object):
                 self.opt.update(self.model.get_loss_func(), x)
                 local_loss = self.model.loss * len(x.data)
                 total_loss += local_loss.data
-                self.logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch,
-                                                                                  local_loss.data / batch_size))
-                self.writer.add_all_parameter_histograms([local_loss], epoch)
+                # self.logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch,
+                #                                                                  local_loss.data / batch_size))
+                # self.writer.add_all_parameter_histograms([local_loss], epoch)
             self.logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss / batch_size))
             self.writer.add_scalar('train_loss', total_loss / batch_size, epoch)
             if total_loss < self.best_loss:
