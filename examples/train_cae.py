@@ -51,7 +51,9 @@ def main():
     writer = SummaryWriter(head)
 
     # read
-    data_obj = dataset.data_dsprites.DspritesDataset(db_path='/Users/yamada/lab/dat/dsprites')
+    # data_obj = dataset.data_dsprites.DspritesDataset(db_path='/Users/yamada/lab/dat/dsprites')
+    data_obj = dataset.data_dsprites.DspritesDataset(db_path='/home/masanori_yamada/lab/dat/dsprites')
+    # data_obj = dataset.data_celeba.CelebADataset(db_path='/home/masanori_yamada / lab / dat / celeba / syorizumi', data_size=200000)
     # data_obj = dataset.data_celeba.CelebADataset(db_path='/Users/yamada/lab/dat/celeba/syorizumi', data_size=200)
     # data_obj = dataset.data_mnist.MnistDataset()
     # data_obj.train_size = 10 #00  # adjust train data size for speed

@@ -11,6 +11,7 @@ standard_library.install_aliases()
 
 import numpy as np
 import copy
+import os
 import chainer
 from chainer import serializers
 from logging import getLogger
@@ -86,9 +87,9 @@ class Trainer(object):
         self.writer.close()
         return self.best_model
 
-    def eval(self, data_obj, epoch, noise_type=None):
+    def eval(self, data_obj, epoch, noise_type=None, output='./results/rec'):
         plt_dict = {}
-        plt_dict['head'] = './results/'
+        plt_dict['head'] = output
         plt_dict['epoch'] = epoch
         plt_dict['test_rec_x'] = []
         plt_dict['test_x'] = []
@@ -113,6 +114,7 @@ class Trainer(object):
                 plt_dict = util.dict_to_cpu(plt_dict)
                 self.logger.debug('plt_dict gpu to cpu')
 
+            os.makedirs(plt_dict['head'], exist_ok=True)
             rec_x = plt_dict['test_rec_x']
             tensorboard_rec_x = rec_x[0].reshape(data_obj.batch_data_shape).transpose(0,3,1,2)
             tensorboard_rec_x = tensorboard.utils.make_grid(data_obj.display(tensorboard_rec_x))

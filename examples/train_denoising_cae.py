@@ -30,7 +30,7 @@ from ae.trainer import Trainer
 def main():
 
     # parametor
-    epoch_num = 100
+    epoch_num = 400
     batch_size = 128
     ana_freq = 5
     gpu = -1
