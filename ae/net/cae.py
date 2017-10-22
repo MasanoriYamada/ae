@@ -22,10 +22,21 @@ class CAE(chainer.Chain):
             # parts of netowork
             # autoencoder with cnn
             if self.data_obj.name == 'mnist':
+                # self.len1 = L.Convolution2D(in_channels=1, out_channels=32, ksize=4, stride=2, pad=1)
+                # self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=4, stride=2, pad=1)
+                # self.len3 = L.Linear(7*7*64, 100)
+                # self.lde0 = L.Linear(100, 7*7*64)
+                # self.lde1 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=4, stride=2, pad=1)
+                # self.lde2 = L.Deconvolution2D(in_channels=32, out_channels=1, ksize=4, stride=2, pad=1)
                 self.len1 = L.Convolution2D(in_channels=1, out_channels=32, ksize=5, stride=1, pad=0)
-                self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=5, stride=1, pad=0)
-                self.lde1 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
-                self.lde2 = L.Deconvolution2D(in_channels=32, out_channels=1, ksize=5, stride=1, pad=0)
+                self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=5, stride=1, pad=0)  # 20x20
+                self.len3 = L.Linear(20*20*64, 100)
+                self.conv_linear_shape = (-1,20*20*64)
+                self.deconv_linear_shape = (-1, 64, 20, 20)
+                self.lde1 = L.Linear(100, 20*20*64)
+                self.lde2 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
+                self.lde3 = L.Deconvolution2D(in_channels=32, out_channels=1, ksize=5, stride=1, pad=0)
+
             elif self.data_obj.name == 'celebA':
                 self.len1 = L.Convolution2D(in_channels=3, out_channels=32, ksize=5, stride=1, pad=0)
                 self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=5, stride=1, pad=0)
@@ -34,21 +45,30 @@ class CAE(chainer.Chain):
             elif self.data_obj.name == 'dsprites':
                 self.len1 = L.Convolution2D(in_channels=1, out_channels=32, ksize=5, stride=1, pad=0)
                 self.len2 = L.Convolution2D(in_channels=32, out_channels=64, ksize=5, stride=1, pad=0)
-                self.lde1 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
-                self.lde2 = L.Deconvolution2D(in_channels=32, out_channels=1, ksize=5, stride=1, pad=0)
+                self.len3 = L.Linear(56*56*64, 100)
+                self.conv_linear_shape = (-1,56*56*64)
+                self.deconv_linear_shape = (-1, 64, 56, 56)
+                self.lde1 = L.Linear(100, 56*56*64)
+                self.lde2 = L.Deconvolution2D(in_channels=64, out_channels=32, ksize=5, stride=1, pad=0)
+                self.lde3 = L.Deconvolution2D(in_channels=32, out_channels=1, ksize=5, stride=1, pad=0)
 
     def encode(self, x):
         with name_scope('conv1', self.len1.params()):
             x = F.relu(self.len1(x))
         with name_scope('conv2', self.len2.params()):
             x = F.relu(self.len2(x))
+        with name_scope('linear1', self.len3.params()):
+            x = self.len3(x.reshape(self.conv_linear_shape))
         return x
 
     def decode(self, z):
-        with name_scope('conv3', self.lde1.params()):
+        with name_scope('linear2', self.lde1.params()):
             z = F.relu(self.lde1(z))
-        with name_scope('conv4', self.lde2.params()):
-            z = F.sigmoid(self.lde2(z))
+            z = z.reshape(self.deconv_linear_shape)
+        with name_scope('conv3', self.lde2.params()):
+            z = F.relu(self.lde2(z))
+        with name_scope('conv4', self.lde3.params()):
+            z = F.sigmoid(self.lde3(z))
         return z
 
     @within_name_scope('CAE')
