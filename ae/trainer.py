@@ -51,6 +51,7 @@ class Trainer(object):
         self.opt.setup(self.model)
         tmp_loss = self.model(chainer.Variable(self.xp.random.rand(1, data_obj.total_dim).astype(self.xp.float32)))
         self.writer.add_graph([tmp_loss])
+        count_data_size = 0
 
         # Learning loop
         for epoch in range(epoch_num):
@@ -65,15 +66,16 @@ class Trainer(object):
 
             total_loss = 0.
             for i, (x, t) in enumerate(train_iter):
+                count_data_size += len(t)
                 x = chainer.Variable(self.xp.array(x, dtype=self.xp.float32))
                 self.opt.update(self.model.get_loss_func(), x)
                 local_loss = self.model.loss * len(x.data)
                 total_loss += local_loss.data
                 # self.logger.debug('{}/{} in epoch = {} , train local loss = {}'.format(i, len(train_iter), epoch,
-                #                                                                  local_loss.data / batch_size))
+                #                                                                  local_loss.data / count_data_size))
                 # self.writer.add_all_parameter_histograms([local_loss], epoch)
-            self.logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss / batch_size))
-            self.writer.add_scalar('train_loss', total_loss / batch_size, epoch)
+            self.logger.info('epoch = {}, train loss = {}'.format(epoch, total_loss / count_data_size))
+            self.writer.add_scalar('train_loss', total_loss / count_data_size, epoch)
             if total_loss < self.best_loss:
                 self.best_model = copy.deepcopy(self.model)
                 self.best_opt = copy.deepcopy(self.opt)
